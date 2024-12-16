@@ -9,7 +9,7 @@ test.describe('Para Bank test suite', ()=>{
   let registrationPage: RegistrationPage;
   let userName:string;
 
-  test.beforeEach('register new user', async ({page})=>{
+  test.beforeEach('Register new user', async ({page})=>{
     await page.goto('/');
     registrationPage = new RegistrationPage(page);
     homePage = new HomePage(page);
@@ -22,7 +22,7 @@ test.describe('Para Bank test suite', ()=>{
     await expect.soft(page.locator(RIGHT_PANEL)).toContainText(ACCOUNT_CREATION_TEXT);
   })
 
-  test('log in with new user', async({page}) => {
+  test('Log in with new user', async({page}) => {
       await registrationPage.clickOnLogOut();
       await registrationPage.logInWithUserName(userName);
 
@@ -66,7 +66,7 @@ test.describe('Para Bank test suite', ()=>{
       expect.soft(await balanceDetails[2].textContent()).toBe(minAmount);
     });
 
-    await test.step('fund transfer to new savings account', async ()=>{
+    await test.step('Fund transfer to new savings account', async ()=>{
       await homePage.goToFundTransferPage();
       await homePage.transferFunds(newAccountNumber);
 
@@ -74,7 +74,7 @@ test.describe('Para Bank test suite', ()=>{
       await expect.soft(transferred).toContainText('Transfer Complete!');
     });
 
-    await test.step('pay bill with new account', async ()=>{
+    await test.step('Pay bill with new account', async ()=>{
       await homePage.goToBillPayPage();
       await homePage.fillPayeeDetails(newAccountNumber, amount);
 
@@ -83,7 +83,7 @@ test.describe('Para Bank test suite', ()=>{
 
     })
 
-    await test.step('find the bill pay transaction', async ()=>{
+    await test.step('Find the bill pay transaction', async ()=>{
       const response = await page.request.get(`https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/${newAccountNumber}/transactions/amount/${amount}?timeout=30000`);
       const body = await response.json();
       expect.soft(body[0].description).toContain(`Bill Payment to`);
