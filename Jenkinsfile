@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    parameters{
+        choice(name: 'BROWSERS', 
+        choices:['chrome', 'safari', 'firefox'],
+        description: 'Choose the browser'
+        )
+    }
     stages {
         stage('Checkout Code') {
             steps {
@@ -8,16 +14,19 @@ pipeline {
         }
         stage('Build') {
             steps {
-                npm install
+                sh "npm install"
+
             }
         }
         stage('Test') {
             steps {
-                npx playwright test --project='chrome'
+                sh "npx playwright test --project=${parameters.BROWSERS}"
             }
         }
-        stage('Archive report'){
-          zip zipFile: "playwright-report.zip", archive: true, dir: 'playwright-report'
-        }
+        // stage('Archive report'){
+        //     steps{
+        //         zip zipFile: "playwright-report.zip", archive: true, dir: 'playwright-report'
+        //     } 
+        // }
     }
 }
