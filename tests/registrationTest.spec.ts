@@ -40,7 +40,7 @@ test.describe('Para Bank test suite', ()=>{
   }
   });
 
-  test.only('Banking operations test', async({page}) => {
+  test('Banking operations test', async({page}) => {
     let newAccountNumber:string;
     const amount  = '300';
     let minAmount:string;
@@ -86,7 +86,7 @@ test.describe('Para Bank test suite', ()=>{
     await test.step('find the bill pay transaction', async ()=>{
       const response = await page.request.get(`https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/${newAccountNumber}/transactions/amount/${amount}?timeout=30000`);
       const body = await response.json();
-      expect(body[0].description).toContain(`Bill Payment to`);
+      expect.soft(body[0].description).toContain(`Bill Payment to`);
     })
 
   })
