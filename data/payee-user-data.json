@@ -1,0 +1,10 @@
+{
+  "payeeName" : "Ram",
+  "payeeAddress" : "Madhapur",
+  "payeeCity" : "Hyd",
+  "payeeState" : "Telangana",
+  "payeeZipCode" : "500081",
+  "payeePhoneNumber" : "991",
+  "payeeAccountNumber" : "123",
+  "confirmAccountNumber" : "123"
+}

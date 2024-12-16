@@ -1,0 +1,12 @@
+{
+  "firstName" : "Ram",
+  "lastName" : "M",
+  "address" : "Madhapur",
+  "cityName" : "Hyd",
+  "stateName" : "Telangana",
+  "zipCode" : "500081",
+  "phoneNumber" : "991",
+  "ssnNumber" : "21",
+  "password" : "password",
+  "confirmPassword" : "password"
+}
