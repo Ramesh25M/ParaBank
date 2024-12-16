@@ -1,3 +1,29 @@
+export const GLOBAL_NAVIGATION_LINKS = '#leftPanel ul a';
+
+export const NEW_ACCOUNT_CREATION_LINK = 'a[href="openaccount.htm"]';
+
+export const ACCOUNT_TYPE = 'select[id="type"]';
+
+export const OPEN_NEW_ACCOUNT_BUTTON = 'input[value="Open New Account"]';
+
+export const NEW_ACCOUNT_NUMBER_TEXT = 'a[id="newAccountId"]';
+
+export const ACCOUNT_OVERVIEW_LINK = 'a[href="overview.htm"]';
+
+export const ACCOUNT_OVERVIEW_TABLE = '[id="accountTable"] tbody';
+
+export const FUND_TRANSFER_LINK = 'a[href="transfer.htm"]';
+
+export const ENTER_AMOUNT = 'input[id="amount"]';
+
+export const SELECT_ACCOUNT_TO_TRANSFER = 'select[id="toAccountId"]';
+
+export const TRANSFER_AMOUNT_BUTTON = 'input[value="Transfer"]';
+ 
+export const ACCOUNT_OPEN_RESULT = '[id="openAccountResult"]';
+
+export const FUND_TRANSFER_RESULT ='div[id="showResult"]';
+
 export const BILL_PAY_LINK = 'a[href="billpay.htm"]';
 
 export const BALANCE_DETAILS = 'tbody tr:nth-child(2) td';

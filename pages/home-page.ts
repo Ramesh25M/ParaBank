@@ -1,16 +1,27 @@
 import {expect, Page} from "@playwright/test";
-import {
+import * as homePageSelectors from "../selectors/homepage-selectors";
+const payeeUserData = require('../data/payee-user-data.json');
+
+const {
+    ACCOUNT_OVERVIEW_LINK,
+    ACCOUNT_TYPE,
     AMOUNT, BILL_PAY_LINK,
     CONFIRM_ACCOUNT_NUMBER,
+    ENTER_AMOUNT,
+    FUND_TRANSFER_LINK,
+    GLOBAL_NAVIGATION_LINKS,
+    NEW_ACCOUNT_CREATION_LINK,
+    NEW_ACCOUNT_NUMBER_TEXT,
+    OPEN_NEW_ACCOUNT_BUTTON,
     PAYEE_ACCOUNT_NUMBER,
     PAYEE_ADDRESS,
     PAYEE_CITY,
     PAYEE_NAME,
     PAYEE_PHONE_NUMBER,
     PAYEE_STATE,
-    PAYEE_ZIP_CODE, SELECT_ACCOUNT_NUMBER, SEND_PAYMENT_BUTTON
-} from "../selectors/homepage-selectors";
-const payeeUserData = require('../data/payee-user-data.json');
+    PAYEE_ZIP_CODE, SELECT_ACCOUNT_NUMBER, SELECT_ACCOUNT_TO_TRANSFER, SEND_PAYMENT_BUTTON,
+    TRANSFER_AMOUNT_BUTTON
+} = homePageSelectors;
 
 export class HomePage {
     readonly page : Page;
@@ -19,52 +30,55 @@ export class HomePage {
         this.page = page;
     }
 
-    async verifyGlobalNavigationLinks(baseUrl: string){
-        const globalLinks = await this.page.locator('#leftPanel ul a').all();
-        for(const globalLink of globalLinks){
-            const href = await globalLink.getAttribute('href');
-            const url = baseUrl + href;
-            const response = await this.page.request.get(url);
-            await expect(response).toBeOK();
-        }
+    async getGlobalNavigationLinks(){
+        return await this.page.locator(GLOBAL_NAVIGATION_LINKS).all();
+    }
+
+    async getMinAmountToText(){
+        const minAmountText =  await this.page.locator('[id="openAccountForm"] p').last().textContent();
+
+        const replacedText = minAmountText.replace(',','');
+        
+        return replacedText.match(/\$\d+(?:\.\d{2})?/g)[0];
+
     }
 
     async goToNewAccountCreationPage(){
-        const newAccountLink= this.page.locator('a[href="openaccount.htm"]');
+        const newAccountLink= this.page.locator(NEW_ACCOUNT_CREATION_LINK);
         await newAccountLink.click();
     }
 
     async createSavingsAccount(){
-        await this.page.locator('select[id="type"]').selectOption("SAVINGS");
+        await this.page.locator(ACCOUNT_TYPE).selectOption("SAVINGS");
 
         await this.page.waitForTimeout(1000);
 
-        await this.page.locator('input[value="Open New Account"]').click();
+        await this.page.locator(OPEN_NEW_ACCOUNT_BUTTON).click();
     }
 
     async getTheAccountNumber(){
-        const account =  this.page.locator('a[id="newAccountId"]');
+        const account =  this.page.locator(NEW_ACCOUNT_NUMBER_TEXT);
         await account.waitFor({state:'visible'});
 
         return await account.textContent();
     }
 
     async goToAccountOverviewPage(){
-        const accountOverViewLink = this.page.locator('a[href="overview.htm"]');
+        const accountOverViewLink = this.page.locator(ACCOUNT_OVERVIEW_LINK);
         await accountOverViewLink.click();
     }
 
     async goToFundTransferPage(){
-        const fundTransferLink =  this.page.locator('a[href="transfer.htm"]');
+        const fundTransferLink =  this.page.locator(FUND_TRANSFER_LINK);
         await fundTransferLink.click();
     }
 
     async transferFunds(accountNumber: string){
-        await this.page.locator('input[id="amount"]').fill('100');
+        await this.page.locator(ENTER_AMOUNT).fill('100');
 
-        await this.page.locator('select[id="toAccountId"]').selectOption(accountNumber);
+        await this.page.locator(SELECT_ACCOUNT_TO_TRANSFER).selectOption(accountNumber);
 
-        await this.page.locator('input[value="Transfer"]').click();
+        await this.page.locator(TRANSFER_AMOUNT_BUTTON).click();
     }
 
     async goToBillPayPage(){

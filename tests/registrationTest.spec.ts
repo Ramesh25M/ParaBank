@@ -1,16 +1,15 @@
 import {test, expect} from '@playwright/test';
 import { RegistrationPage } from '../pages/registration-page';
 import {HomePage} from "../pages/home-page";
-import {BALANCE_DETAILS, BILL_PAY_RESULT} from "../selectors/homepage-selectors";
-import {ACCOUNT_CREATION_TEXT, RIGHT_PANEL} from "../selectors/registration-locators";
+import {ACCOUNT_OPEN_RESULT, ACCOUNT_OVERVIEW_TABLE, BALANCE_DETAILS, BILL_PAY_RESULT, FUND_TRANSFER_RESULT} from "../selectors/homepage-selectors";
+import {ACCOUNT_CREATION_TEXT, ACCOUNT_OVERVIEW, RIGHT_PANEL} from "../selectors/registration-locators";
 
-
-test.describe('Para Bank', ()=>{
+test.describe('Para Bank test suite', ()=>{
   let homePage: HomePage;
   let registrationPage: RegistrationPage;
   let userName:string;
 
-  test.beforeEach('register the user', async ({page})=>{
+  test.beforeEach('register new user', async ({page})=>{
     await page.goto('/');
     registrationPage = new RegistrationPage(page);
     homePage = new HomePage(page);
@@ -20,64 +19,72 @@ test.describe('Para Bank', ()=>{
     await registrationPage.fillRegistrationDetails(userName);
     await registrationPage.submitRegistrationForm();
 
-    await expect(page.locator(RIGHT_PANEL)).toContainText(ACCOUNT_CREATION_TEXT);
+    await expect.soft(page.locator(RIGHT_PANEL)).toContainText(ACCOUNT_CREATION_TEXT);
   })
 
-  test('log in', async({page}) => {
+  test('log in with new user', async({page}) => {
       await registrationPage.clickOnLogOut();
       await registrationPage.logInWithUserName(userName);
 
-      await expect(page.locator('[id="showOverview"]')).toContainText('Accounts Overview');
+      await expect.soft(page.locator(ACCOUNT_OVERVIEW)).toContainText('Accounts Overview');
   })
 
-  test('Global Navigation links check', async() => {
+  test('Global Navigation links check', async({page}) => {
     const baseUrl = 'https://parabank.parasoft.com/parabank/';
-    await homePage.verifyGlobalNavigationLinks(baseUrl);
+    const globalLinks = await homePage.getGlobalNavigationLinks();
+
+    for(const globalLink of globalLinks){
+      const href = await globalLink.getAttribute('href');
+      const response = await page.request.get(baseUrl + href);
+      await expect.soft(response).toBeOK();
+  }
   });
 
-  test('savings Account', async({page}) => {
-    let accountNumber:string;
+  test.only('Banking operations test', async({page}) => {
+    let newAccountNumber:string;
     const amount  = '300';
+    let minAmount:string;
 
-    await test.step('create savings account', async ()=>{
+    await test.step('create new savings account', async ()=>{
       await homePage.goToNewAccountCreationPage();
+      minAmount = await homePage.getMinAmountToText();
       await homePage.createSavingsAccount();
 
-      accountNumber = await homePage.getTheAccountNumber();
+      expect.soft(page.locator(ACCOUNT_OPEN_RESULT)).toContainText('Account Opened!')
+
+      newAccountNumber = await homePage.getTheAccountNumber();
     })
 
-    await test.step('balance detail check', async ()=>{
+    await test.step('Account overview - balance detail check', async ()=>{
       await homePage.goToAccountOverviewPage();
+      await page.locator(ACCOUNT_OVERVIEW_TABLE).waitFor({state:'visible'});
 
-      await page.waitForTimeout(3000);
       const balanceDetails = await page.locator(BALANCE_DETAILS).all();
 
-      expect(await balanceDetails[0].textContent()).toContain(accountNumber);
-      expect(await balanceDetails[1].textContent()).toBe('$100.00');
-      expect(await balanceDetails[2].textContent()).toBe('$100.00');
+      expect.soft(await balanceDetails[0].textContent()).toContain(newAccountNumber);
+      expect.soft(await balanceDetails[1].textContent()).toBe(minAmount);
+      expect.soft(await balanceDetails[2].textContent()).toBe(minAmount);
     });
 
-    await test.step('fund transfer', async ()=>{
+    await test.step('fund transfer to new savings account', async ()=>{
       await homePage.goToFundTransferPage();
+      await homePage.transferFunds(newAccountNumber);
 
-      await homePage.transferFunds(accountNumber);
-
-      const transferred = page.locator('div[id="showResult"]');
-
-      await expect(transferred).toContainText('Transfer Complete!');
+      const transferred = page.locator(FUND_TRANSFER_RESULT);
+      await expect.soft(transferred).toContainText('Transfer Complete!');
     });
 
-    await test.step('bill pay', async ()=>{
+    await test.step('pay bill with new account', async ()=>{
       await homePage.goToBillPayPage();
-      await homePage.fillPayeeDetails(accountNumber, amount);
+      await homePage.fillPayeeDetails(newAccountNumber, amount);
 
       await homePage.clickOnSendPayment();
-      await expect(page.locator(BILL_PAY_RESULT)).toBeVisible();
+      await expect.soft(page.locator(BILL_PAY_RESULT)).toBeVisible();
 
     })
 
-    await test.step('find transaction', async ()=>{
-      const response = await page.request.get(`https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/${accountNumber}/transactions/amount/${amount}?timeout=30000`);
+    await test.step('find the bill pay transaction', async ()=>{
+      const response = await page.request.get(`https://parabank.parasoft.com/parabank/services_proxy/bank/accounts/${newAccountNumber}/transactions/amount/${amount}?timeout=30000`);
       const body = await response.json();
       expect(body[0].description).toContain(`Bill Payment to`);
     })

@@ -23,10 +23,10 @@ pipeline {
                 sh "npx playwright test --project=${parameters.BROWSERS}"
             }
         }
-        // stage('Archive report'){
-        //     steps{
-        //         zip zipFile: "playwright-report.zip", archive: true, dir: 'playwright-report'
-        //     } 
-        // }
+        stage('Archive report'){
+            steps{
+                zip zipFile: "playwright-report.zip", archive: true, dir: 'playwright-report'
+            } 
+        }
     }
 }

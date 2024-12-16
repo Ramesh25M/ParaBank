@@ -4,7 +4,11 @@ import {
     FIRST_NAME,
     LAST_NAME, PASSWORD, PHONE_NUMBER,
     REGISTRATION_BUTTON,
-    REGISTER_LINK, SSN_NUMBER, STATE_NAME, USER_NAME, ZIP_CODE
+    REGISTER_LINK, SSN_NUMBER, STATE_NAME, USER_NAME, ZIP_CODE,
+    LOGIN_USERNAME,
+    LOGIN_PASSWORD,
+    LOGIN_BUTTON,
+    LOGOUT_BUTTON
 } from '../selectors/registration-locators';
 const userData = require('../data/registration-data.json');
 
@@ -49,17 +53,16 @@ export class RegistrationPage{
     }
 
     async clickOnLogOut(){
-        const logOutButton = this.page.locator('a[href="logout.htm"]');
+        const logOutButton = this.page.locator(LOGOUT_BUTTON);
         await logOutButton.waitFor({state:'visible'});
         await logOutButton.click();
     }
 
     async logInWithUserName(userName : string){
-        await this.page.locator('input[name="username"]').fill(userName);
+        await this.page.locator(LOGIN_USERNAME).fill(userName);
+        await this.page.locator(LOGIN_PASSWORD).fill(userData.password);
 
-        await this.page.locator('input[name="password"]').fill(userData.password);
-
-        await this.page.locator('input[value="Log In"]').click();
+        await this.page.locator(LOGIN_BUTTON).click();
     }
 
 
